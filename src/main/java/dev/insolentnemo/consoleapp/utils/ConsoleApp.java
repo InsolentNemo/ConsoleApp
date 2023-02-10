@@ -2,12 +2,19 @@ package dev.insolentnemo.consoleapp.utils;
 
 import java.util.Scanner;
 
-public class ConsoleApp {
+public abstract class ConsoleApp {
 
-    public static void run() {
-        Logger.clearConsole();
-        Logger.println(ConsoleColor.PURPLE_BRIGHT + getTitle() + " v" + getVersion());
+    private void initialize() {
+        CommandHandler.initialize();
+        PluginManager.initialize();
+    }
+
+    public void start() {
         initialize();
+        Logger.clearConsole();
+        onStarted();
+        PluginManager.loadAll();
+        PluginManager.enableAll();
         Logger.println("Type 'help' for a list of available commands.");
         final Scanner scanner = new Scanner(System.in);
 
@@ -20,19 +27,5 @@ public class ConsoleApp {
         }
     }
 
-    private static void initialize() {
-        CommandHandler.initialize();
-        PluginManager.initialize();
-        PluginManager.loadAll();
-        PluginManager.enableAll();
-    }
-
-    public static String getVersion() {
-        return ConsoleApp.class.getPackage().getImplementationVersion();
-    }
-
-    public static String getTitle() {
-        return ConsoleApp.class.getPackage().getImplementationTitle();
-    }
-
+    public abstract void onStarted();
 }
