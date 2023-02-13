@@ -1,14 +1,13 @@
 package dev.insolentnemo.consoleapp.input.commands;
 
 import dev.insolentnemo.consoleapp.input.Command;
-import dev.insolentnemo.consoleapp.utils.CommandHandler;
+import dev.insolentnemo.consoleapp.utils.ConsoleApp;
 import dev.insolentnemo.consoleapp.utils.Logger;
-import dev.insolentnemo.consoleapp.utils.PluginManager;
 
 public class ReloadCommand extends Command {
 
-    public ReloadCommand() {
-        super("reload");
+    public ReloadCommand(ConsoleApp consoleApp) {
+        super(consoleApp, "reload");
     }
 
     @Override
@@ -18,7 +17,7 @@ public class ReloadCommand extends Command {
             return;
         }
 
-        reload();
+        getConsoleApp().reload();
     }
 
     @Override
@@ -26,10 +25,4 @@ public class ReloadCommand extends Command {
 
     }
 
-    private void reload() {
-        Logger.println("Reloading ...");
-        CommandHandler.reload();
-        PluginManager.reload();
-        Logger.println("Reload completed.");
-    }
 }

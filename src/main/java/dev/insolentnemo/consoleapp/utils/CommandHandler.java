@@ -21,9 +21,9 @@ public class CommandHandler {
     }
 
     private static void initializeCommands() {
-        add("help", new HelpCommand());
-        add("clear", new ClearCommand());
-        add("reload", new ReloadCommand());
+        add("help", new HelpCommand(consoleApp));
+        add("clear", new ClearCommand(consoleApp));
+        add("reload", new ReloadCommand(consoleApp));
         consoleApp.addCommands();
     }
 

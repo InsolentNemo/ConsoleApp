@@ -1,12 +1,13 @@
 package dev.insolentnemo.consoleapp.input.commands;
 
 import dev.insolentnemo.consoleapp.input.Command;
+import dev.insolentnemo.consoleapp.utils.ConsoleApp;
 import dev.insolentnemo.consoleapp.utils.Logger;
 
 public class ClearCommand extends Command {
 
-    public ClearCommand() {
-        super("clear");
+    public ClearCommand(ConsoleApp consoleApp) {
+        super(consoleApp, "clear");
     }
 
     @Override

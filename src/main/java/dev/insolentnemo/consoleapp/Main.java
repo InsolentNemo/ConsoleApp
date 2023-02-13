@@ -16,6 +16,11 @@ public class Main {
             }
 
             @Override
+            public void onReload() {
+
+            }
+
+            @Override
             public void addCommands() {
 
             }

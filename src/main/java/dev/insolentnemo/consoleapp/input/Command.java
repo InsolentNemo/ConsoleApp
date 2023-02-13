@@ -1,5 +1,6 @@
 package dev.insolentnemo.consoleapp.input;
 
+import dev.insolentnemo.consoleapp.utils.ConsoleApp;
 import dev.insolentnemo.consoleapp.utils.Logger;
 
 import java.util.Arrays;
@@ -8,10 +9,12 @@ import java.util.Map;
 
 public abstract class Command {
 
-    private String usage;
+    private final ConsoleApp consoleApp;
+    private final String usage;
     private final Map<String, Command> subCommands = new HashMap<>();
 
-    public Command(String usage) {
+    public Command(ConsoleApp consoleApp, String usage) {
+        this.consoleApp = consoleApp;
         this.usage = usage;
         registerSubCommands();
     }
@@ -65,8 +68,7 @@ public abstract class Command {
         return usage + " <" + subCommandsStr + ">";
     }
 
-    public void setUsage(String usage) {
-        this.usage = usage;
+    public ConsoleApp getConsoleApp() {
+        return consoleApp;
     }
-
 }

@@ -1,5 +1,6 @@
 package dev.insolentnemo.consoleapp.input;
 
+import dev.insolentnemo.consoleapp.utils.ConsoleApp;
 import dev.insolentnemo.consoleapp.utils.Logger;
 
 import java.util.List;
@@ -9,8 +10,8 @@ public abstract class Book extends Command {
     private short linesPerPage = 10;
     private List<String> list;
 
-    public Book(String usage) {
-        super(usage);
+    public Book(ConsoleApp consoleApp, String usage) {
+        super(consoleApp, usage);
     }
 
     @Override

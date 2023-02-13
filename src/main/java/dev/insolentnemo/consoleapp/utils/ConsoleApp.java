@@ -23,7 +23,17 @@ public abstract class ConsoleApp {
         }
     }
 
+    public void reload() {
+        Logger.println("Reloading ...");
+        onReload();
+        CommandHandler.reload();
+        PluginManager.reload();
+        Logger.println("Reload completed.");
+    }
+
     public abstract void onStarted();
+
+    public abstract void onReload();
 
     public abstract void addCommands();
 
