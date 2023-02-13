@@ -5,7 +5,7 @@ import java.util.Scanner;
 public abstract class ConsoleApp {
 
     private void initialize() {
-        CommandHandler.initialize();
+        CommandHandler.initialize(this);
         PluginManager.initialize();
     }
 
@@ -24,4 +24,7 @@ public abstract class ConsoleApp {
     }
 
     public abstract void onStarted();
+
+    public abstract void addCommands();
+
 }

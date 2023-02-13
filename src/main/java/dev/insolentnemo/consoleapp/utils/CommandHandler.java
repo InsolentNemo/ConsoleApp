@@ -13,6 +13,7 @@ import java.util.List;
 public class CommandHandler {
 
     private static final HashMap<String, Command> commands = new HashMap<>();
+    private static ConsoleApp consoleApp;
 
     public static void initialize() {
         initializeCommands();
@@ -36,6 +37,7 @@ public class CommandHandler {
     public static void reload() {
         commands.clear();
         initializeCommands();
+        consoleApp.addCommands();
     }
 
     public static void handle(String line) {
