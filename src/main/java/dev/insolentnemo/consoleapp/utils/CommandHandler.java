@@ -15,7 +15,8 @@ public class CommandHandler {
     private static final HashMap<String, Command> commands = new HashMap<>();
     private static ConsoleApp consoleApp;
 
-    public static void initialize() {
+    public static void initialize(ConsoleApp consoleApp) {
+        CommandHandler.consoleApp = consoleApp;
         initializeCommands();
     }
 
