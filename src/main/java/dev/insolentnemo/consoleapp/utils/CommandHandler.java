@@ -40,16 +40,16 @@ public class CommandHandler {
 
     public static void handle(String line) {
         final String[] lineArray = line.split(" ");
-        final String commandString = lineArray[0].toLowerCase();
-        final Command command = commands.get(commandString);
+        final String commandStr = lineArray[0].toLowerCase();
+        final Command command = commands.get(commandStr);
 
         if (command == null) {
-            Logger.invalidCommand(commandString);
+            Logger.invalidCommand(commandStr);
             return;
         }
 
         final String[] args = Arrays.copyOfRange(lineArray, 1, lineArray.length);
-        command.runCommand(args);
+        command.run(args);
     }
 
     public static List<Command> getCommands() {

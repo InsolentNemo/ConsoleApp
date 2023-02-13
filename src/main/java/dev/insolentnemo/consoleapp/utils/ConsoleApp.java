@@ -11,11 +11,7 @@ public abstract class ConsoleApp {
 
     public void start() {
         initialize();
-        Logger.clearConsole();
         onStarted();
-        PluginManager.loadAll();
-        PluginManager.enableAll();
-        Logger.println("Type 'help' for a list of available commands.");
         final Scanner scanner = new Scanner(System.in);
 
         while (Thread.currentThread().isAlive()) {

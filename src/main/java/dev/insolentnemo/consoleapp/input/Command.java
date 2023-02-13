@@ -16,7 +16,7 @@ public abstract class Command {
         registerSubCommands();
     }
 
-    public void runCommand(String[] args) {
+    public void run(String[] args) {
         if (subCommands.size() == 0) {
             onCommand(args);
             return;
@@ -36,7 +36,7 @@ public abstract class Command {
         }
 
         final String[] subCommandArgs = Arrays.copyOfRange(args, 1, args.length);
-        subCommand.runCommand(subCommandArgs);
+        subCommand.run(subCommandArgs);
     }
 
     public abstract void onCommand(String[] args);
