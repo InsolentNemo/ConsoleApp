@@ -24,6 +24,7 @@ public class CommandHandler {
         add("help", new HelpCommand());
         add("clear", new ClearCommand());
         add("reload", new ReloadCommand());
+        consoleApp.addCommands();
     }
 
     public static void add(String label, Command command) {
