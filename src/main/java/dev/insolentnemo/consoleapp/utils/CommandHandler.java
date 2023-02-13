@@ -39,7 +39,6 @@ public class CommandHandler {
     public static void reload() {
         commands.clear();
         initializeCommands();
-        consoleApp.addCommands();
     }
 
     public static void handle(String line) {
