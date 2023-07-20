@@ -29,7 +29,11 @@ public class PluginManager {
             final Properties properties = plugin.getProperties();
             final String name = properties.getProperty("name").toLowerCase();
 
-            if (!disabledPlugins.contains(name)) plugin.enable();
+            if (disabledPlugins != null) {
+                if (disabledPlugins.contains(name)) continue;
+            }
+
+            plugin.enable();
         }
     }
 
@@ -55,6 +59,7 @@ public class PluginManager {
             return;
         }
 
+        plugin.setProperties(properties);
         PLUGINS.put(name, plugin);
     }
 
