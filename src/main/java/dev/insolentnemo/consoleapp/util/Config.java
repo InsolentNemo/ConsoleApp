@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class Config {
 
@@ -72,8 +73,11 @@ public class Config {
     }
 
     public static void addToList(String key, Object object) {
+        if (!JSON.containsKey(key)) JSON.put(key, new JSONArray());
+
         final JSONArray list = (JSONArray) JSON.get(key);
         list.add(object);
+        JSON.put(key, list);
     }
 
     public static void removeFromList(String key, Object object) {
