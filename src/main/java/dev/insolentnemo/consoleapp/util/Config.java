@@ -81,8 +81,11 @@ public class Config {
     }
 
     public static void removeFromList(String key, Object object) {
+        if (!JSON.containsKey(key)) return;
+
         final JSONArray list = (JSONArray) JSON.get(key);
         list.remove(object);
+        JSON.put(key, list);
     }
 
 }
