@@ -4,18 +4,11 @@ import java.util.Scanner;
 
 public class ConsoleApp {
 
-    public ConsoleApp() {
-        initialize();
-    }
-
-    private void initialize() {
-        CommandHandler.initialize(this);
-        PluginManager.initialize();
-        Config.initialize();
-    }
-
     public void start() {
+        CommandHandler.initialize(this);
+        Config.initialize();
         onStart();
+        PluginManager.initialize();
         final Scanner scanner = new Scanner(System.in);
 
         while (Thread.currentThread().isAlive()) {
