@@ -37,8 +37,8 @@ public class PluginManager {
         }
     }
 
-    public static void load(File pluginFile) {
-        final Properties properties = getProperties(pluginFile);
+    public static void load(File file) {
+        final Properties properties = getProperties(file);
         final String name = properties.getProperty("name").toLowerCase();
         final String main = properties.getProperty("main");
 
@@ -51,14 +51,15 @@ public class PluginManager {
         final Plugin plugin;
 
         try {
-            classLoader = URLClassLoader.newInstance(new URL[]{ pluginFile.toURL() });
+            classLoader = URLClassLoader.newInstance(new URL[]{ file.toURL() });
             plugin = (Plugin) classLoader.loadClass(main).newInstance();
         } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException exception) {
-            Logger.error("Failed loading plugin '" + pluginFile + "'.");
+            Logger.error("Failed loading plugin '" + file + "'.");
             exception.printStackTrace();
             return;
         }
 
+        plugin.setFile(file);
         plugin.setProperties(properties);
         PLUGINS.put(name, plugin);
     }
@@ -78,9 +79,17 @@ public class PluginManager {
 
     public static void reload(Plugin plugin) {
         final File file = plugin.getFile();
-        plugin.disable();
+        final boolean enabled = plugin.isEnabled();
+
+        if (enabled) plugin.disable();
+
         unload(plugin);
         load(file);
+        final Properties properties = getProperties(file);
+        final String name = properties.getProperty("name").toLowerCase();
+        final Plugin newPlugin = PLUGINS.get(name);
+
+        if (enabled) newPlugin.enable();
     }
 
     public static void reloadAll() {
@@ -127,15 +136,15 @@ public class PluginManager {
         return PLUGINS.values().stream().toList();
     }
 
-    private static Properties getProperties(File pluginFile) {
+    private static Properties getProperties(File file) {
         final Properties properties = new Properties();
         final String osName = System.getProperty("os.name");
 
         try {
             final URL url;
-            if (osName.contains("Windows")) url = new URL("jar:file:/" + pluginFile + "!/plugin.properties");
+            if (osName.contains("Windows")) url = new URL("jar:file:/" + file + "!/plugin.properties");
             else if (osName.contains("Linux")) {
-                final String pluginName = pluginFile.getName();
+                final String pluginName = file.getName();
                 url = new URL("jar:file:./plugins/" + pluginName + "!/plugin.properties");
             }
             else throw new RuntimeException(osName + " is not supported.");
