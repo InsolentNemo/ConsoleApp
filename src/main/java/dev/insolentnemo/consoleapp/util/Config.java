@@ -9,7 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 
 public class Config {
 
@@ -28,6 +27,8 @@ public class Config {
             final String fileName = FILE.getName();
             Logger.error("Cannot create config file '" + fileName + "'.");
         }
+
+        save();
     }
 
     public static void load() {
@@ -45,12 +46,12 @@ public class Config {
     }
 
     public static void save() {
-        final FileWriter fileWriter;
         try {
             if (!FILE.exists()) create();
 
-            fileWriter = new FileWriter(FILE, false);
-            fileWriter.write(JSON.toJSONString());
+            final FileWriter fileWriter = new FileWriter(FILE, false);
+            final String jsonStr = JSON.toJSONString();
+            fileWriter.write(jsonStr);
             fileWriter.close();
         } catch (IOException exception) {
             final String fileName = FILE.getName();
