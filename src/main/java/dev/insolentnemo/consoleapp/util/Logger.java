@@ -31,6 +31,12 @@ public class Logger {
         log(prefix + " " + line);
     }
 
+    public static void println(String[] lines)  {
+        String linesStr = lines[0];
+        for (int i = 1; i < lines.length; i++) linesStr += "\n" + lines[i];
+        println(linesStr);
+    }
+
     public static void info(String info) { println(MessageType.INFO, info);}
 
     public static void warning(String warning) { println(MessageType.WARNING, warning);}
