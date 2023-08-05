@@ -5,11 +5,16 @@ import java.util.*;
 
 public class Plugin {
 
+    private final ConsoleApp consoleApp;
     private boolean enabled = false;
     private File file;
     private Properties properties;
 
     private final Map<String, Command> commands = new HashMap<>();
+
+    public Plugin(ConsoleApp consoleApp) {
+        this.consoleApp = consoleApp;
+    }
 
     public void enable() {
         enabled = true;
@@ -42,6 +47,10 @@ public class Plugin {
     protected void onEnable() { }
 
     protected void onDisable() { }
+
+    public ConsoleApp getConsoleApp() {
+        return consoleApp;
+    }
 
     public boolean isEnabled() {
         return enabled;
