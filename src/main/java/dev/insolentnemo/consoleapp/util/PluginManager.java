@@ -5,7 +5,6 @@ import org.json.simple.JSONArray;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -13,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class PluginManager {
 
@@ -39,29 +40,48 @@ public class PluginManager {
 
     public static void load(File file) {
         final Properties properties = getProperties(file);
-        final String name = properties.getProperty("name").toLowerCase();
+
+        if (properties == null)  {
+            Logger.error("Failed loading plugin '" + file + "'. No properties file found.");
+            return;
+        }
+
         final String main = properties.getProperty("main");
+
+        if (main == null) {
+            Logger.error("Failed loading plugin '" + file + "'. No property named 'main' found.");
+            return;
+        }
+
+        final String name = properties.getProperty("name").toLowerCase();
 
         if (PLUGINS.containsKey(name)) {
             Logger.error("Plugin named '" + name + "' were already loaded.");
             return;
         }
 
+        final Plugin plugin = createPlugin(file, properties);
+        PLUGINS.put(name, plugin);
+    }
+
+    private static Plugin createPlugin(File file, Properties properties) {
+        final String main = properties.getProperty("main");
         final URLClassLoader classLoader;
         final Plugin plugin;
 
         try {
             classLoader = URLClassLoader.newInstance(new URL[]{ file.toURL() });
             plugin = (Plugin) classLoader.loadClass(main).newInstance();
+            plugin.setFile(file);
+            plugin.setProperties(properties);
+            classLoader.close();
         } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException exception) {
             Logger.error("Failed loading plugin '" + file + "'.");
             exception.printStackTrace();
-            return;
+            return null;
         }
 
-        plugin.setFile(file);
-        plugin.setProperties(properties);
-        PLUGINS.put(name, plugin);
+        return plugin;
     }
 
     public static void loadAll() {
@@ -111,6 +131,15 @@ public class PluginManager {
 
     public static void enable(Plugin plugin) {
         if (plugin.isEnabled()) return;
+
+        final Map<String, Command> commands = plugin.getCommands();
+
+        for (Map.Entry<String, Command> entry : commands.entrySet()) {
+            final String label = entry.getKey();
+            final Command command = entry.getValue();
+            CommandHandler.add(label, command);
+        }
+
         plugin.enable();
     }
 
@@ -120,6 +149,14 @@ public class PluginManager {
 
     public static void disable(Plugin plugin) {
         if (!plugin.isEnabled()) return;
+
+        final Map<String, Command> commands = plugin.getCommands();
+
+        for (Map.Entry<String, Command> entry : commands.entrySet()) {
+            final String label = entry.getKey();
+            CommandHandler.remove(label);
+        }
+
         plugin.disable();
     }
 
@@ -138,23 +175,17 @@ public class PluginManager {
 
     private static Properties getProperties(File file) {
         final Properties properties = new Properties();
-        final String osName = System.getProperty("os.name");
 
         try {
-            final URL url;
-            if (osName.contains("Windows")) url = new URL("jar:file:/" + file + "!/plugin.properties");
-            else if (osName.contains("Linux")) {
-                final String pluginName = file.getName();
-                url = new URL("jar:file:./plugins/" + pluginName + "!/plugin.properties");
-            }
-            else throw new RuntimeException(osName + " is not supported.");
-
-            final JarURLConnection connection = (JarURLConnection) url.openConnection();
-            final InputStream inputStream = connection.getInputStream();
+            final JarFile jarFile = new JarFile(file);
+            final JarEntry propertiesFile = jarFile.getJarEntry("plugin.properties");
+            final InputStream inputStream = jarFile.getInputStream(propertiesFile);
             properties.load(inputStream);
+            jarFile.close();
             return properties;
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            exception.printStackTrace();
+            return null;
         }
     }
 
