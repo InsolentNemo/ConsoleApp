@@ -8,7 +8,7 @@ public class ConsoleApp {
         CommandHandler.initialize(this);
         Config.initialize();
         onStart();
-        PluginManager.initialize();
+        PluginManager.initialize(this);
         final Scanner scanner = new Scanner(System.in);
 
         while (Thread.currentThread().isAlive()) {

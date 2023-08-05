@@ -5,6 +5,8 @@ import org.json.simple.JSONArray;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -17,13 +19,20 @@ import java.util.jar.JarFile;
 
 public class PluginManager {
 
+    private static ConsoleApp CONSOLE_APP;
     private static final File PLUGINS_PATH = new File(System.getProperty("user.dir") + "/plugins");
     private static final Map<String, Plugin> PLUGINS = new HashMap<>();
 
-    public static void initialize() {
+    public static void initialize(ConsoleApp consoleApp) {
+        CONSOLE_APP = consoleApp;
+
         if (!PLUGINS_PATH.exists()) PLUGINS_PATH.mkdirs();
 
         loadAll();
+        autoDisableCommands();
+    }
+
+    private static void autoDisableCommands() {
         final JSONArray disabledPlugins = (JSONArray) Config.get("disabled-plugins");
 
         for (Plugin plugin : PLUGINS.values()) {
@@ -71,11 +80,13 @@ public class PluginManager {
 
         try {
             classLoader = URLClassLoader.newInstance(new URL[]{ file.toURL() });
-            plugin = (Plugin) classLoader.loadClass(main).newInstance();
+            final Constructor constructor = classLoader.loadClass(main).getDeclaredConstructor(CONSOLE_APP.getClass());
+            plugin = (Plugin) constructor.newInstance(CONSOLE_APP);
             plugin.setFile(file);
             plugin.setProperties(properties);
             classLoader.close();
-        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException exception) {
+        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException |
+            InvocationTargetException | NoSuchMethodException exception) {
             Logger.error("Failed loading plugin '" + file + "'.");
             exception.printStackTrace();
             return null;
@@ -114,7 +125,8 @@ public class PluginManager {
 
     public static void reloadAll() {
         unloadAll();
-        initialize();
+        loadAll();
+        autoDisableCommands();
     }
 
     public static void unload(Plugin plugin) {
