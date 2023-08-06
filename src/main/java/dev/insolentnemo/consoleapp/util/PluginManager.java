@@ -43,7 +43,7 @@ public class PluginManager {
                 if (disabledPlugins.contains(name)) continue;
             }
 
-            plugin.enable();
+            enable(plugin);
         }
     }
 
@@ -70,6 +70,12 @@ public class PluginManager {
         }
 
         final Plugin plugin = createPlugin(file, properties);
+
+        if (plugin == null) {
+            Logger.error("Failed loading plugin '" + file + "'.");
+            return;
+        }
+
         PLUGINS.put(name, plugin);
     }
 
@@ -80,14 +86,13 @@ public class PluginManager {
 
         try {
             classLoader = URLClassLoader.newInstance(new URL[]{ file.toURL() });
-            final Constructor constructor = classLoader.loadClass(main).getDeclaredConstructor(CONSOLE_APP.getClass());
+            final Constructor<?> constructor = classLoader.loadClass(main).getConstructor(ConsoleApp.class);
             plugin = (Plugin) constructor.newInstance(CONSOLE_APP);
             plugin.setFile(file);
             plugin.setProperties(properties);
             classLoader.close();
         } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException |
             InvocationTargetException | NoSuchMethodException exception) {
-            Logger.error("Failed loading plugin '" + file + "'.");
             exception.printStackTrace();
             return null;
         }
@@ -144,6 +149,7 @@ public class PluginManager {
     public static void enable(Plugin plugin) {
         if (plugin.isEnabled()) return;
 
+        plugin.enable();
         final Map<String, Command> commands = plugin.getCommands();
 
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
@@ -151,8 +157,6 @@ public class PluginManager {
             final Command command = entry.getValue();
             CommandHandler.add(label, command);
         }
-
-        plugin.enable();
     }
 
     public static void enableAll() {
@@ -162,6 +166,7 @@ public class PluginManager {
     public static void disable(Plugin plugin) {
         if (!plugin.isEnabled()) return;
 
+        plugin.disable();
         final Map<String, Command> commands = plugin.getCommands();
 
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
@@ -169,7 +174,6 @@ public class PluginManager {
             CommandHandler.remove(label);
         }
 
-        plugin.disable();
     }
 
     public static void disableAll() {
