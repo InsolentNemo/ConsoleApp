@@ -45,11 +45,6 @@ public class CommandHandler {
         COMMANDS.remove(label);
     }
 
-    public static void reload() {
-        COMMANDS.clear();
-        initializeCommands();
-    }
-
     public static void handle(String line) {
         final String[] lineArr = line.split(" ");
         final String commandStr = lineArr[0].toLowerCase();

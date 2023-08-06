@@ -23,7 +23,6 @@ public class ConsoleApp {
     public void reload() {
         Logger.println("Reloading ...");
         onReload();
-        CommandHandler.reload();
         PluginManager.reloadAll();
         Config.reload();
         Logger.println("Reload completed.");
