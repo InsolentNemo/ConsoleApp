@@ -5,8 +5,7 @@ import org.json.simple.JSONArray;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ public class PluginManager {
     private static ConsoleApp CONSOLE_APP;
     private static final File PLUGINS_PATH = new File(System.getProperty("user.dir") + "/plugins");
     private static final Map<String, Plugin> PLUGINS = new HashMap<>();
+    private static final Map<String, URLClassLoader> CLASS_LOADERS = new HashMap<>();
 
     public static void initialize(ConsoleApp consoleApp) {
         CONSOLE_APP = consoleApp;
@@ -82,18 +82,19 @@ public class PluginManager {
     private static Plugin createPlugin(File file, Properties properties) {
         final String main = properties.getProperty("main");
         final URLClassLoader classLoader;
-        final Plugin plugin;
+        Plugin plugin = null;
 
         try {
-            classLoader = URLClassLoader.newInstance(new URL[]{ file.toURL() });
-            final Constructor<?> constructor = classLoader.loadClass(main).getConstructor(ConsoleApp.class);
-            plugin = (Plugin) constructor.newInstance(CONSOLE_APP);
+            classLoader = URLClassLoader.newInstance(new URL[]{ file.toURI().toURL() });
+            final Class<?> pluginClass = classLoader.loadClass(main);
+            plugin = (Plugin) pluginClass.newInstance();
+            plugin.setConsoleApp(CONSOLE_APP);
             plugin.setFile(file);
             plugin.setProperties(properties);
             classLoader.close();
-        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException |
-            InvocationTargetException | NoSuchMethodException exception) {
-            exception.printStackTrace();
+        } catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException exception) {
+            final String message = exception.getMessage();
+            Logger.error(message);
             return null;
         }
 
@@ -149,7 +150,26 @@ public class PluginManager {
     public static void enable(Plugin plugin) {
         if (plugin.isEnabled()) return;
 
-        plugin.enable();
+        final Properties properties = plugin.getProperties();
+        final String main = properties.getProperty("main");
+        final File file = plugin.getFile();
+        final URLClassLoader classLoader;
+        Plugin newPlugin = null;
+
+        try {
+            classLoader = URLClassLoader.newInstance(new URL[]{ file.toURI().toURL() });
+            final Class<?> pluginClass = classLoader.loadClass(main);
+            newPlugin = (Plugin) pluginClass.newInstance();
+        } catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException exception) {
+            final String message = exception.getMessage();
+            Logger.error(message);
+            return;
+        }
+
+        newPlugin.setConsoleApp(CONSOLE_APP);
+        newPlugin.setFile(file);
+        newPlugin.setProperties(properties);
+        newPlugin.enable();
         final Map<String, Command> commands = plugin.getCommands();
 
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
@@ -157,6 +177,10 @@ public class PluginManager {
             final Command command = entry.getValue();
             CommandHandler.add(label, command);
         }
+
+        final String name = properties.getProperty("name").toLowerCase();
+        PLUGINS.put(name, newPlugin);
+        CLASS_LOADERS.put(name, classLoader);
     }
 
     public static void enableAll() {
@@ -167,6 +191,17 @@ public class PluginManager {
         if (!plugin.isEnabled()) return;
 
         plugin.disable();
+        final Properties properties = plugin.getProperties();
+        final String name = properties.getProperty("name").toLowerCase();
+        URLClassLoader classLoader = CLASS_LOADERS.get(name);
+
+        try {
+            classLoader.close();
+        } catch (IOException exception) {
+            final String message = exception.getMessage();
+            Logger.error(message);
+        }
+
         final Map<String, Command> commands = plugin.getCommands();
 
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
@@ -174,6 +209,7 @@ public class PluginManager {
             CommandHandler.remove(label);
         }
 
+        CLASS_LOADERS.remove(name);
     }
 
     public static void disableAll() {

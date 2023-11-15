@@ -1,20 +1,19 @@
 package dev.insolentnemo.consoleapp.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 public class Plugin {
 
-    private final ConsoleApp consoleApp;
+    private ConsoleApp consoleApp;
+    private final Map<String, Command> commands = new HashMap<>();
     private boolean enabled = false;
     private File file;
     private Properties properties;
-
-    private final Map<String, Command> commands = new HashMap<>();
-
-    public Plugin(ConsoleApp consoleApp) {
-        this.consoleApp = consoleApp;
-    }
 
     public void enable() {
         enabled = true;
@@ -50,6 +49,10 @@ public class Plugin {
 
     public ConsoleApp getConsoleApp() {
         return consoleApp;
+    }
+
+    public void setConsoleApp(ConsoleApp consoleApp) {
+        this.consoleApp = consoleApp;
     }
 
     public boolean isEnabled() {
