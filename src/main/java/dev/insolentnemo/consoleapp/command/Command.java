@@ -1,4 +1,7 @@
-package dev.insolentnemo.consoleapp.util;
+package dev.insolentnemo.consoleapp.command;
+
+import dev.insolentnemo.consoleapp.util.ConsoleApp;
+import dev.insolentnemo.consoleapp.util.Logger;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,14 +19,15 @@ public class Command {
         registerSubCommands();
     }
 
-    public void run(String[] args) {
+    public void run(CommandSender sender, String[] args) {
         if (subCommands.size() == 0) {
-            onCommand(args);
+            onCommand(sender, args);
             return;
         }
 
         if (args.length == 0) {
-            Logger.usageError(this);
+            final String usage = getUsage();
+            sender.sendUsageError(usage);
             return;
         }
 
@@ -31,21 +35,17 @@ public class Command {
         final Command subCommand = subCommands.get(subCommandStr);
 
         if (subCommand == null) {
-            Logger.invalidCommand(subCommandStr);
+            sender.sendInvalidCommandError(subCommandStr);
             return;
         }
 
         final String[] subCommandArgs = Arrays.copyOfRange(args, 1, args.length);
-        subCommand.run(subCommandArgs);
+        subCommand.run(sender, subCommandArgs);
     }
 
-    protected void onCommand(String[] args) { }
+    protected void onCommand(CommandSender sender, String[] args) { }
 
     protected void registerSubCommands() { }
-
-    protected ConsoleApp getConsoleApp() {
-        return consoleApp;
-    }
 
     protected void addSubCommand(String label, Command subCommand) {
         if (subCommands.containsKey(label)) return;
@@ -68,4 +68,11 @@ public class Command {
         return usage + " <" + subCommandsStr + ">";
     }
 
+    protected ConsoleApp getConsoleApp() {
+        return consoleApp;
+    }
+
+    public Map<String, Command> getSubCommands() {
+        return subCommands;
+    }
 }

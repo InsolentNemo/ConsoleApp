@@ -1,7 +1,10 @@
-package dev.insolentnemo.consoleapp.command;
+package dev.insolentnemo.consoleapp.command.essential;
 
-import dev.insolentnemo.consoleapp.command.plugin.*;
-import dev.insolentnemo.consoleapp.util.Command;
+import dev.insolentnemo.consoleapp.command.essential.plugin.PluginDisableCommand;
+import dev.insolentnemo.consoleapp.command.essential.plugin.PluginEnableCommand;
+import dev.insolentnemo.consoleapp.command.essential.plugin.PluginInfoCommand;
+import dev.insolentnemo.consoleapp.command.essential.plugin.PluginReloadCommand;
+import dev.insolentnemo.consoleapp.command.Command;
 import dev.insolentnemo.consoleapp.util.ConsoleApp;
 
 public class PluginCommand extends Command {

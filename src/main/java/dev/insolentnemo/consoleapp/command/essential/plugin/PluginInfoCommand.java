@@ -1,5 +1,9 @@
-package dev.insolentnemo.consoleapp.command.plugin;
+package dev.insolentnemo.consoleapp.command.essential.plugin;
 
+import dev.insolentnemo.consoleapp.command.Command;
+import dev.insolentnemo.consoleapp.command.CommandSender;
+import dev.insolentnemo.consoleapp.plugin.Plugin;
+import dev.insolentnemo.consoleapp.plugin.PluginManager;
 import dev.insolentnemo.consoleapp.util.*;
 
 import java.util.ArrayList;
@@ -13,9 +17,10 @@ public class PluginInfoCommand extends Command {
     }
 
     @Override
-    protected void onCommand(String[] args) {
+    protected void onCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            Logger.usageError(this);
+            final String usage = getUsage();
+            sender.sendUsageError(usage);
             return;
         }
 
@@ -23,7 +28,7 @@ public class PluginInfoCommand extends Command {
         final Plugin plugin = PluginManager.getPlugin(name);
 
         if (plugin == null) {
-            Logger.error("There is no plugin named '" + name + "'.");
+            sender.sendError("There is no plugin named '" + name + "'.");
             return;
         }
 
@@ -40,7 +45,7 @@ public class PluginInfoCommand extends Command {
         if (author != null) lines.add("Author: " + author);
 
         final String[] linesArr = lines.toArray(new String[]{});
-        Logger.println(linesArr);
+        sender.sendMessage(linesArr);
     }
 
 }

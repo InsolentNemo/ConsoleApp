@@ -1,11 +1,16 @@
-package dev.insolentnemo.consoleapp.util;
+package dev.insolentnemo.consoleapp.plugin;
 
+import dev.insolentnemo.consoleapp.command.Command;
+import dev.insolentnemo.consoleapp.command.CommandHandler;
+import dev.insolentnemo.consoleapp.plugin.Plugin;
+import dev.insolentnemo.consoleapp.util.Config;
+import dev.insolentnemo.consoleapp.util.ConsoleApp;
+import dev.insolentnemo.consoleapp.util.Logger;
 import org.json.simple.JSONArray;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -47,6 +52,28 @@ public class PluginManager {
         }
     }
 
+    private static Plugin createPlugin(File file, Properties properties) {
+        final String main = properties.getProperty("main");
+        final URLClassLoader classLoader;
+        Plugin plugin = null;
+
+        try {
+            classLoader = URLClassLoader.newInstance(new URL[]{ file.toURI().toURL() });
+            final Class<?> pluginClass = classLoader.loadClass(main);
+            plugin = (Plugin) pluginClass.newInstance();
+            plugin.setConsoleApp(CONSOLE_APP);
+            plugin.setFile(file);
+            plugin.setProperties(properties);
+            classLoader.close();
+        } catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException exception) {
+            final String message = exception.getMessage();
+            Logger.error(message);
+            return null;
+        }
+
+        return plugin;
+    }
+
     public static void load(File file) {
         final Properties properties = getProperties(file);
 
@@ -79,28 +106,6 @@ public class PluginManager {
         PLUGINS.put(name, plugin);
     }
 
-    private static Plugin createPlugin(File file, Properties properties) {
-        final String main = properties.getProperty("main");
-        final URLClassLoader classLoader;
-        Plugin plugin = null;
-
-        try {
-            classLoader = URLClassLoader.newInstance(new URL[]{ file.toURI().toURL() });
-            final Class<?> pluginClass = classLoader.loadClass(main);
-            plugin = (Plugin) pluginClass.newInstance();
-            plugin.setConsoleApp(CONSOLE_APP);
-            plugin.setFile(file);
-            plugin.setProperties(properties);
-            classLoader.close();
-        } catch (IOException | InstantiationException | IllegalAccessException | ClassNotFoundException exception) {
-            final String message = exception.getMessage();
-            Logger.error(message);
-            return null;
-        }
-
-        return plugin;
-    }
-
     public static void loadAll() {
         final File[] files = PLUGINS_PATH.listFiles();
         final List<File> jars = new ArrayList<>();
@@ -116,14 +121,11 @@ public class PluginManager {
 
     public static void reload(Plugin plugin) {
         final File file = plugin.getFile();
-        final boolean enabled = plugin.isEnabled();
-
-        if (enabled) plugin.disable();
-
-        unload(plugin);
-        load(file);
         final Properties properties = getProperties(file);
         final String name = properties.getProperty("name").toLowerCase();
+        final boolean enabled = plugin.isEnabled();
+        unload(plugin);
+        load(file);
         final Plugin newPlugin = PLUGINS.get(name);
 
         if (enabled) newPlugin.enable();
@@ -170,12 +172,13 @@ public class PluginManager {
         newPlugin.setFile(file);
         newPlugin.setProperties(properties);
         newPlugin.enable();
+        final CommandHandler commandHandler = CONSOLE_APP.getCommandHandler();
         final Map<String, Command> commands = plugin.getCommands();
 
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
             final String label = entry.getKey();
             final Command command = entry.getValue();
-            CommandHandler.add(label, command);
+            commandHandler.add(label, command);
         }
 
         final String name = properties.getProperty("name").toLowerCase();
@@ -202,11 +205,12 @@ public class PluginManager {
             Logger.error(message);
         }
 
+        final CommandHandler commandHandler = CONSOLE_APP.getCommandHandler();
         final Map<String, Command> commands = plugin.getCommands();
 
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
             final String label = entry.getKey();
-            CommandHandler.remove(label);
+            commandHandler.remove(label);
         }
 
         CLASS_LOADERS.remove(name);

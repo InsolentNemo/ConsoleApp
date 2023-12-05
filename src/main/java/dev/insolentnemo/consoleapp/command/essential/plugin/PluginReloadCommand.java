@@ -1,5 +1,9 @@
-package dev.insolentnemo.consoleapp.command.plugin;
+package dev.insolentnemo.consoleapp.command.essential.plugin;
 
+import dev.insolentnemo.consoleapp.command.Command;
+import dev.insolentnemo.consoleapp.command.CommandSender;
+import dev.insolentnemo.consoleapp.plugin.Plugin;
+import dev.insolentnemo.consoleapp.plugin.PluginManager;
 import dev.insolentnemo.consoleapp.util.*;
 
 import java.util.Properties;
@@ -11,9 +15,10 @@ public class PluginReloadCommand extends Command {
     }
 
     @Override
-    protected void onCommand(String[] args) {
+    protected void onCommand(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            Logger.usageError(this);
+            final String usage = getUsage();
+            sender.sendUsageError(usage);
             return;
         }
 
@@ -21,14 +26,14 @@ public class PluginReloadCommand extends Command {
         final Plugin plugin = PluginManager.getPlugin(name);
 
         if (plugin == null) {
-            Logger.error("There is no plugin named '" + name + "'.");
+            sender.sendError("There is no plugin named '" + name + "'.");
             return;
         }
 
         PluginManager.reload(plugin);
         final Properties properties = plugin.getProperties();
         final String pluginName = properties.getProperty("name");
-        Logger.println("Plugin '" + pluginName + "' has been reloaded.");
+        sender.sendMessage("Plugin '" + pluginName + "' has been reloaded.");
     }
 
 }

@@ -1,10 +1,10 @@
-package dev.insolentnemo.consoleapp.util;
+package dev.insolentnemo.consoleapp.plugin;
+
+import dev.insolentnemo.consoleapp.command.Command;
+import dev.insolentnemo.consoleapp.util.ConsoleApp;
+import dev.insolentnemo.consoleapp.util.Logger;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 
 public class Plugin {

@@ -45,18 +45,6 @@ public class Logger {
         println(MessageType.ERROR, error);
     }
 
-    public static void argumentError(String argument)  {
-        error("Argument '" + argument + "' is invalid.");
-    }
-
-    public static void invalidCommand(String command) {
-        error("Invalid command '" + command + "'.");
-    }
-
-    public static void usageError(Command command)  {
-        error("Usage: " + command.getUsage());
-    }
-
     public static void clearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();

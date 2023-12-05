@@ -1,5 +1,8 @@
-package dev.insolentnemo.consoleapp.command;
+package dev.insolentnemo.consoleapp.command.essential;
 
+import dev.insolentnemo.consoleapp.command.Book;
+import dev.insolentnemo.consoleapp.plugin.Plugin;
+import dev.insolentnemo.consoleapp.plugin.PluginManager;
 import dev.insolentnemo.consoleapp.util.*;
 
 import java.util.ArrayList;

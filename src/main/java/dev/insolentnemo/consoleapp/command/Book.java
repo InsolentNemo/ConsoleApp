@@ -1,4 +1,8 @@
-package dev.insolentnemo.consoleapp.util;
+package dev.insolentnemo.consoleapp.command;
+
+import dev.insolentnemo.consoleapp.command.Command;
+import dev.insolentnemo.consoleapp.util.ConsoleApp;
+import dev.insolentnemo.consoleapp.util.Logger;
 
 import java.util.List;
 
@@ -12,7 +16,7 @@ public abstract class Book extends Command {
     }
 
     @Override
-    public void onCommand(String[] args) {
+    public void onCommand(CommandSender sender, String[] args) {
         list = onListRefresh();
         final int maxPages = (int) Math.ceil((double) list.size() / linesPerPage);
         final int page;
@@ -22,24 +26,24 @@ public abstract class Book extends Command {
             try {
                 page = Integer.parseInt(args[0]);
             } catch (NumberFormatException exception) {
-                Logger.argumentError(args[0]);
+                sender.sendArgumentError(args[0]);
                 return;
             }
         }
 
         if (list.size() == 0) {
-            Logger.error("Page '" + page + "' is invalid. There are no available pages.");
+            sender.sendError("Page '" + page + "' is invalid. There are no available pages.");
             return;
         }
 
         final String pageStr = getPage(page);
 
         if (pageStr == null) {
-            Logger.error("Page '" + page + "' is invalid. Available pages: 1-" + maxPages);
+            sender.sendError("Page '" + page + "' is invalid. Available pages: 1-" + maxPages);
             return;
         }
 
-        Logger.println(pageStr);
+        sender.sendMessage(pageStr);
     }
 
     protected abstract List<String> onListRefresh();
